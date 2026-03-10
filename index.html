@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danylo Mosienko | Full-Cycle Dev</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg: #000000;
+            --accent: #ffffff;
+            --dim: #888888;
+            --card-bg: #0a0a0a;
+            --border: rgba(255, 255, 255, 0.1);
+            --side-padding: 8%; 
+        }
+
+        /* КРАСИВЫЙ СКРОЛЛБАР */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        /* Для Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) var(--bg);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { 
+            background: var(--bg); 
+            color: var(--accent); 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        #cursor { position: fixed; width: 6px; height: 6px; background: #fff; border-radius: 50%; pointer-events: none; z-index: 10000; }
+        #cursor-f { position: fixed; width: 35px; height: 35px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; pointer-events: none; z-index: 9999; }
+
+        .header-nav {
+            width: 100%;
+            padding: 12px var(--side-padding); 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(15px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-nav a, .header-nav div { 
+            color: var(--dim); 
+            text-decoration: none; 
+            font-weight: 500; 
+            transition: all 0.3s ease;
+        }
+        .header-nav a:hover { 
+            color: var(--accent); 
+            transform: translateY(-2px);
+        }
+        
+        /* FIX: Подсветка всей локации */
+        .nav-location { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .nav-location:hover .loc-bottom, 
+        .nav-location:hover .loc-top { color: var(--accent); }
+        
+        .loc-top { display: block; line-height: 1.2; white-space: nowrap; color: var(--accent); transition: 0.3s; }
+        .loc-line { width: 100%; height: 1px; background: var(--border); margin: 4px 0; }
+        .loc-bottom { 
+            color: var(--dim); 
+            font-weight: 800; 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            line-height: 1;
+            white-space: nowrap;
+            transition: 0.3s;
+        }
+
+        /* MAGNETIC WRAPPER */
+        .magnetic {
+            display: inline-block;
+            transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .hero {
+            min-height: calc(100vh - 60px); 
+            padding: 0 var(--side-padding);
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 40px;
+            align-items: center;
+            background: radial-gradient(circle at 20% 50%, #111 0%, #000 100%);
+            perspective: 1000px;
+        }
+
+        /* --- СТИЛИ ДЛЯ КОТА --- */
+        .cat-container {
+            position: relative;
+            display: inline-block;
+        }
+        .rupert-cat {
+            position: absolute;
+            width: 110px; /* Размер кота */
+            top: -48px;   /* Позиция над именем */
+            left: -20px;  /* Сдвиг влево */
+            z-index: 10;
+            pointer-events: none;
+            transform: rotate(7deg);
+        }
+        /* --------------------- */
+
+        /* ЭФФЕКТ ПУЛЬСИРУЮЩЕГО СВЕЧЕНИЯ */
+        .glow-text {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { text-shadow: 0 0 0px rgba(255,255,255,0); }
+            50% { text-shadow: 0 0 20px rgba(255,255,255,0.4), 0 0 40px rgba(255,255,255,0.1); }
+        }
+
+        .hero-text h1 {
+            font-size: clamp(4rem, 10vw, 8.5rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 25px;
+        }
+        .hero-text h2 { 
+            font-size: 2rem; 
+            font-weight: 300; 
+            color: var(--dim);
+            min-height: 2.4rem; 
+        }
+        
+        #typewriter::after {
+            content: '|';
+            animation: blink 0.7s infinite;
+            margin-left: 5px;
+            color: var(--accent);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .hero-img {
+            width: 100%; height: 550px; background: var(--card-bg);
+            border: 1px solid var(--border); overflow: hidden; filter: grayscale(1);
+            transition: transform 0.1s ease-out, border-color 0.5s ease, filter 0.8s ease;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .hero-img:hover { filter: grayscale(0); border-color: rgba(255,255,255,0.5); }
+        .hero-img img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            transition: transform 0.1s ease-out;
+            pointer-events: none;
+        }
+        .hero-img::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: 0.7s;
+        }
+        .hero-img:hover::after { left: 150%; }
+
+        section { padding: 120px var(--side-padding); border-top: 1px solid var(--border); }
+        .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 4px; color: var(--dim); margin-bottom: 60px; display: block; }
+
+        .skills-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 25px; 
+        }
+
+        .skill-card { 
+            background: var(--card-bg); 
+            padding: 40px; 
+            border: 1px solid var(--border); 
+            transition: 0.3s; 
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-card:last-child:nth-child(3n+1) { grid-column: 2; }
+
+        .skill-card:hover { border-color: #fff; }
+        .skill-card h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; z-index: 2; position: relative; }
+        .skill-card p { color: var(--dim); font-size: 1rem; line-height: 1.7; z-index: 2; position: relative; }
+
+        .experience-item { margin-bottom: 80px; }
+        .exp-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+        .exp-head h3 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+        .exp-head span { color: var(--dim); font-size: 0.9rem; }
+        .exp-sub { font-size: 1.1rem; color: #fff; margin-bottom: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .bullet-list { list-style: none; }
+        .bullet-list li { margin-bottom: 15px; padding-left: 30px; position: relative; color: var(--dim); font-size: 1.05rem; }
+        .bullet-list li::before { content: "→"; position: absolute; left: 0; color: #fff; }
+
+        .summary-text { font-size: 1.7rem; font-weight: 300; line-height: 1.3; color: #f0f0f0; max-width: 1200px; }
+        .summary-text b { color: #fff; font-weight: 700; }
+
+        .footer { text-align: center; padding: 180px var(--side-padding); border-top: 1px solid var(--border); }
+        .footer a { font-size: 8vw; font-weight: 900; text-decoration: none; color: #fff; transition: 0.5s; }
+        .footer a:hover { color: transparent; -webkit-text-stroke: 1px #fff; }
+
+        @media (max-width: 1100px) {
+            .skills-grid { grid-template-columns: repeat(2, 1fr); }
+            .skill-card:last-child:nth-child(3n+1) { grid-column: auto; }
+            .skill-card:last-child:nth-child(2n+1) { grid-column: 1 / span 2; justify-self: center; width: 50%; }
+        }
+
+        @media (max-width: 700px) {
+            .skills-grid { grid-template-columns: 1fr; }
+            .skill-card:last-child:nth-child(2n+1) { grid-column: auto; width: 100%; }
+        }
+
+        @media (max-width: 1024px) {
+            .header-nav { flex-wrap: wrap; justify-content: center; gap: 20px; }
+            .hero { grid-template-columns: 1fr; height: auto; padding-top: 100px; }
+            .hero-img { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="cursor-f"></div>
+
+    <nav class="header-nav">
+        <div class="magnetic"><a href="https://github.com">GitHub</a></div>
+        <div class="magnetic"><a href="https://linkedin.com">LinkedIn</a></div>
+        <div class="magnetic"><a href="mailto:remightwork@gmail.com">remightwork@gmail.com</a></div>
+        <div class="magnetic"><a href="tel:+380684399821">+38 (068) 439-98-21</a></div>
+        <div class="nav-location magnetic">
+            <span class="loc-top">Currently in Ukraine</span>
+            <div class="loc-line"></div>
+            <span class="loc-bottom">READY TO RELOCATE</span>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" style="border:none;">
+            <div class="hero-text">
+                <div class="cat-container">
+                    <img src="Black Cat Sticker.gif" alt="Cat" class="rupert-cat">
+                    <h1 class="glow-text">Danylo<br>Mosienko</h1>
+                </div>
+                <h2><span id="typewriter"></span></h2>
+            </div>
+            <div class="hero-img" id="tilt-img">
+                <img src="danilo-krutoi.png" alt="Danylo Mosienko">
+            </div>
+        </section>
+
+        <section>
+            <span class="label">01 / Summary</span>
+            <div class="summary-text">
+                Web Developer focused on <b>Frontend with Backend experience</b>. I build high-performance applications and adaptive interfaces, combining technical engineering with a design-driven mindset. Proficient in using <b>AI tools</b> for code optimization and workflow automation. My background in digital design and system administration allows me to handle <b>full-cycle project tasks</b> and technical infrastructure.
+            </div>
+        </section>
+
+        <section>
+            <span class="label">02 / Technical Stack</span>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <h3>Web Dev (Core)</h3>
+                    <p>JavaScript (ES6+), TypeScript, React, Next.js, Node.js, Zustand/Redux Toolkit, TanStack Query, HTML/CSS (SCSS/SASS, Tailwind CSS, Shadcn UI), REST API, WebSockets.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Development Tools</h3>
+                    <p>Git, GitHub, Webpack, Vite, PNPM/Bun (NPM/Yarn), DevTools, Linux CLI, Postman.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Engineering & Architecture</h3>
+                    <p>Clean Code (SOLID, DRY), Feature-Sliced Design (FSD), SSR/SSG/ISR Optimization, Web Performance Optimization, CI/CD (GitHub Actions).</p>
+                </div>
+                <div class="skill-card">
+                    <h3>AI & Automation</h3>
+                    <p>AI Prompt Engineering and leveraging advanced AI tools (LLMs, Copilot, Cursor, Claude Sonnet) for refactoring, deep optimization, and routine automation.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Testing & CMS</h3>
+                    <p>Vitest / Jest (Unit Testing), Playwright (E2E). WordPress, OpenCart, MODX, Tilda, and custom integrations.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Design & Media</h3>
+                    <p>Figma (UI/UX Prototyping & Wireframing), Adobe Photoshop (Web & Advertising Design, Advanced Visual Processing), DaVinci Resolve (Video Production).</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Systems & Infrastructure</h3>
+                    <p>Docker & Docker Compose, Nginx, Linux/Windows System Administration, Server Hardware & Network Infrastructure, Systems Troubleshooting & Optimization.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <span class="label">03 / Experience</span>
+            
+            <div class="experience-item">
+                <div class="exp-head">
+                    <h3>Full-Stack Developer & Technical Specialist | 2021 – Present</h3>
+                </div>
+                <p class="exp-sub">Core Technical Engineering & Adaptation</p>
+                <ul class="bullet-list">
+                    <li>Tier 1-2 GEO Engineering: Performing full-cycle technical preparation and deep adaptation of landing pages for high-traffic markets. Extensively restructuring codebases, implementing custom technical solutions, and performing deep JS/API engineering to ensure maximum stability and conversion.</li>
+                    <li>Performance Optimization: Maximizing load speeds and performance (Google PageSpeed), ensuring infrastructure stability, SEO improvement, and configuring advanced caching with comprehensive asset optimization.</li>
+                    <li>Automation & AI: Developing custom scripts for system integrations and functional enhancements. Leveraging neural networks for data analysis, rapid development, and process optimization.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <p class="exp-sub">Web Development & CMS Management</p>
+                <ul class="bullet-list">
+                    <li>Full-Cycle Development: End-to-end development of new projects and editing existing sites, improving functionality, user experience, and overall technical support.</li>
+                    <li>Platform Management: Full-cycle development and maintenance using WordPress, OpenCart, MODX, and Tilda (custom features & bug fixing).</li>
+                    <li>Content Localization & Copywriting: Technical translation and adaptation of ad copy for diverse cultural contexts, ensuring high engagement and linguistic accuracy.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <p class="exp-sub">Design & Multimedia Production</p>
+                <ul class="bullet-list">
+                    <li>Graphic Design (Photoshop): Advanced raster graphics production. Full cycle of retouching, complex photo montage, and asset creation for web, social media, and UI.</li>
+                    <li>UI/UX Design (Figma): Prototyping interfaces and designing visual elements with a focus on cross-device responsiveness and user interaction.</li>
+                    <li>Video Production: Advanced video editing, motion graphics, and high-quality content creation using DaVinci Resolve for various digital formats.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item" style="margin-bottom:0;">
+                <p class="exp-sub">Technical Operations & Systems</p>
+                <ul class="bullet-list">
+                    <li>System Administration: Comprehensive management of software environments, OS setup (Windows/Linux), and ensuring overall operational stability.</li>
+                    <li>Infrastructure Support: Hardware diagnostics, PC/Server configuration, network troubleshooting, and resolving complex technical issues.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <span class="label">04 / Background</span>
+            <div class="skills-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+                <div class="skill-card">
+                    <h3>Education</h3>
+                    <p>Specialist Degree in Electrotechnical Engineering.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Languages</h3>
+                    <p>English (B2), <br>Ukrainian (Native), <br>Russian (Native), <br>Slovak (Learning).</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Other</h3>
+                    <p>Driving License (Category B).</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="footer">
+            <a href="mailto:remightwork@gmail.com">LET'S CONNECT</a>
+        </section>
+    </main>
+
+    <script>
+        // TYPEWRITER EFFECT
+        const textElement = document.getElementById('typewriter');
+        const phrases = ['Web Developer & Digital Designer', 'Full-Cycle Developer'];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typeSpeed = 100;
+
+        function type() {
+            const currentPhrase = phrases[phraseIndex];
+            if (isDeleting) {
+                textElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+                typeSpeed = 50;
+            } else {
+                textElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+                typeSpeed = 100;
+            }
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                isDeleting = true;
+                typeSpeed = 2000; 
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                typeSpeed = 500;
+            }
+            setTimeout(type, typeSpeed);
+        }
+        document.addEventListener('DOMContentLoaded', () => type());
+
+        // CURSOR & FOLLOW
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('cursor-f');
+        document.addEventListener('mousemove', e => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });
+            gsap.to(follower, { x: e.clientX - 17, y: e.clientY - 17, duration: 0.15 });
+        });
+
+        // PHOTO TILT EFFECT (Minimalistic 3D)
+        const tiltImg = document.getElementById('tilt-img');
+        tiltImg.addEventListener('mousemove', (e) => {
+            const { left, top, width, height } = tiltImg.getBoundingClientRect();
+            const x = (e.clientX - left) / width - 0.5;
+            const y = (e.clientY - top) / height - 0.5;
+            
+            gsap.to(tiltImg, {
+                rotationY: x * 10,
+                rotationX: -y * 10,
+                transformPerspective: 1000,
+                ease: 'power2.out',
+                duration: 0.5
+            });
+        });
+
+        tiltImg.addEventListener('mouseleave', () => {
+            gsap.to(tiltImg, { rotationY: 0, rotationX: 0, duration: 0.5 });
+        });
+
+        // GSAP SECTIONS REVEAL
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('section').forEach(s => {
+            gsap.from(s, { opacity: 0, y: 50, duration: 1.2, scrollTrigger: { trigger: s, start: "top 85%" } });
+        });
+
+        // MAGNETIC EFFECT FOR NAV
+        const magnets = document.querySelectorAll('.magnetic');
+        magnets.forEach((magnet) => {
+            magnet.addEventListener('mousemove', (e) => {
+                const bound = magnet.getBoundingClientRect();
+                const x = e.clientX - bound.left - bound.width / 2;
+                const y = e.clientY - bound.top - bound.height / 2;
+                gsap.to(magnet, { x: x * 0.35, y: y * 0.35, duration: 0.3, ease: 'power2.out' });
+            });
+            magnet.addEventListener('mouseleave', () => {
+                gsap.to(magnet, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
+            });
+        });
+    </script>
+</body>
+</html>
